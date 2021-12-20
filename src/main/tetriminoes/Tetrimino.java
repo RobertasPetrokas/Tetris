@@ -95,10 +95,6 @@ public abstract class Tetrimino {
 
 
     public void rotateRight() {
-        if (this.tetriminoType == TetriminoType.tetriminoSquare) {
-            return;
-        }
-
         this.orientation++;
 
         if (this.orientation == rotationCoords.length) {
@@ -113,10 +109,6 @@ public abstract class Tetrimino {
     }
 
     public void rotateLeft() {
-        if (this.tetriminoType == TetriminoType.tetriminoSquare) {
-            return;
-        }
-
         this.orientation--;
 
         if (this.orientation < 0) {
