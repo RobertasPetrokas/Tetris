@@ -1,3 +1,10 @@
+package main;
+
+import main.Interfaces.IBoard;
+import main.Interfaces.IGameRules;
+import main.Interfaces.IWindowsRenderer;
+import main.tetriminoes.Tetrimino;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -7,10 +14,11 @@ import java.awt.event.WindowEvent;
 
 public class Main extends JFrame implements KeyListener {
 
-    private static final Board board = new Board();
-    private final WindowsRenderer windowsRenderer = new WindowsRenderer(board);
-    private final GameRules gameRules = new GameRules(board);
-    private Tetrimino tetrimino = new Tetrimino(gameRules, board);
+    private final IBoard board = new Board();
+    private final IWindowsRenderer windowsRenderer = new WindowsRenderer(board);
+    private final IGameRules gameRules = new GameRules(board);
+    private Tetrimino tetrimino = gameRules.initRandomTetrimino();
+
     private boolean isGameOver = false;
 
     public Main() throws Exception {
@@ -50,7 +58,6 @@ public class Main extends JFrame implements KeyListener {
 
     }
 
-
     @Override
     public void keyTyped(KeyEvent e) {
         //
@@ -68,8 +75,8 @@ public class Main extends JFrame implements KeyListener {
         board.setTetriminoCoordinates(tetrimino);
 
         if (tetrimino.isFallen()) {
-            board.checkLines();
-            tetrimino = new Tetrimino(gameRules, board);
+            board.boardCheck();
+            tetrimino = gameRules.initRandomTetrimino();
             board.setTetriminoCoordinates(tetrimino);
             if (gameRules.hasFallen(tetrimino)) {
                 isGameOver = true;
@@ -82,4 +89,6 @@ public class Main extends JFrame implements KeyListener {
     public void keyReleased(KeyEvent e) {
         //
     }
+
+
 }

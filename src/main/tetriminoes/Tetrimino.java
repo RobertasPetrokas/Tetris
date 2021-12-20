@@ -1,44 +1,28 @@
+package main.tetriminoes;
+
+import main.Coordinates;
+import main.Interfaces.IGameRules;
+import main.TetriminoType;
+
 import java.util.ArrayList;
 
-public class Tetrimino implements Cloneable {
-    private final int[][][][] tetriminoCoords = {
-            {{{0, 0}, {1, 0}, {2, 0}, {3, 0}}, {{0, 0}, {0, 1}, {0, 2}, {0, 3}}}, //tetriminoLine
-            {{{0, 2}, {1, 0}, {1, 1}, {1, 2}}, {{2, 1}, {0, 0}, {1, 0}, {2, 0}}, {{1, 0}, {0, 2}, {0, 1}, {0, 0}}, {{0, 0}, {2, 1}, {1, 1}, {0, 1}}}, //tetriminoL
-            {{{0, 0}, {1, 0}, {1, 1}, {1, 2}}, {{0, 1}, {0, 0}, {1, 0}, {2, 0}}, {{1, 2}, {0, 2}, {0, 1}, {0, 0}}, {{2, 0}, {2, 1}, {1, 1}, {0, 1}}},  //tetriminoJ
-            {{{0, 0}, {1, 0}, {0, 1}, {1, 1}}}, //tetriminoSquare
-            {{{0, 1}, {0, 2}, {1, 0}, {1, 1}}, {{1, 1}, {2, 1}, {0, 0}, {1, 0}}}, //tetriminoS
-            {{{0, 0}, {0, 1}, {0, 2}, {1, 1}}, {{0, 1}, {1, 1}, {2, 1}, {1, 0}}, {{1, 2}, {1, 1}, {1, 0}, {0, 1}}, {{2, 0}, {1, 0}, {0, 0}, {1, 1}}}, //tetriminoT
-            {{{0, 0}, {0, 1}, {1, 1}, {1, 2}}, {{0, 1}, {1, 0}, {1, 1}, {2, 0}}} //tetriminoZ
-    };
-    private final Board board;
-    private final GameRules gameRules;
-    private TetriminoType tetriminoType;
-    private ArrayList<Coordinates> coordinates = new ArrayList<>();
+
+public abstract class Tetrimino {
+    private final IGameRules gameRules;
+    protected int[][][] rotationCoords;
+    protected ArrayList<Coordinates> startingCoords;
+    protected ArrayList<Coordinates> coordinates;
+    protected TetriminoType tetriminoType;
     private boolean isFallen;
     private int orientation;
 
 
-    public Tetrimino(GameRules gameRules, Board board) {
+    public Tetrimino(IGameRules gameRules) {
         this.gameRules = gameRules;
-        this.tetriminoType = TetriminoType.getRandomTetrimino();
         this.isFallen = false;
-        this.board = board;
         this.orientation = 0;
-        int tetriminoTypeIndex = tetriminoType.ordinal();
-
-        for (int i = 0; i < 4; i++) {
-            this.coordinates.add(new Coordinates(tetriminoCoords[tetriminoTypeIndex][this.orientation][i][0], tetriminoCoords[tetriminoTypeIndex][this.orientation][i][1] + 3));
-        }
-
     }
 
-    public Tetrimino(Tetrimino t) {
-        this.board = t.board;
-        this.gameRules = t.gameRules;
-        this.coordinates = t.coordinates;
-        this.orientation = t.orientation;
-        this.tetriminoType = t.tetriminoType;
-    }
 
     public boolean isFallen() {
         return isFallen;
@@ -57,18 +41,30 @@ public class Tetrimino implements Cloneable {
         this.coordinates = coordinates;
     }
 
-    public int[][][] getThisTetriminoCoords() {
-        return tetriminoCoords[this.tetriminoType.ordinal()];
+
+    public int[][][] getRotationCoords() {
+        return rotationCoords;
+    }
+
+    public IGameRules getGameRules() {
+        return gameRules;
     }
 
     public int getOrientation() {
         return orientation;
     }
 
+    public void setOrientation(int orientation) {
+        this.orientation = orientation;
+    }
+
     public TetriminoType getTetriminoType() {
         return this.tetriminoType;
     }
 
+    public void setTetriminoType(TetriminoType tetriminoType) {
+        this.tetriminoType = tetriminoType;
+    }
 
     public void moveDown() {
         if (gameRules.hasFallen(this))
@@ -105,7 +101,7 @@ public class Tetrimino implements Cloneable {
 
         this.orientation++;
 
-        if (this.orientation == tetriminoCoords[tetriminoType.ordinal()].length) {
+        if (this.orientation == rotationCoords.length) {
             this.orientation = 0;
         }
 
@@ -124,7 +120,7 @@ public class Tetrimino implements Cloneable {
         this.orientation--;
 
         if (this.orientation < 0) {
-            this.orientation = tetriminoCoords[tetriminoType.ordinal()].length - 1;
+            this.orientation = rotationCoords.length - 1;
         }
 
         if (gameRules.canRotate(this)) {
@@ -137,12 +133,33 @@ public class Tetrimino implements Cloneable {
 
 
     public void rotate(ArrayList<Coordinates> coordinates) {
-        int x = board.getHighestX(coordinates);
-        int y = board.getLowestY(coordinates);
+        int x = getHighestX(coordinates);
+        int y = getLowestY(coordinates);
         for (int i = 0; i < coordinates.size(); i++) {
-            coordinates.get(i).setY(tetriminoCoords[tetriminoType.ordinal()][orientation][i][1] + y);
-            coordinates.get(i).setX(tetriminoCoords[tetriminoType.ordinal()][orientation][i][0] + x);
+            coordinates.get(i).setY(rotationCoords[orientation][i][1] + y);
+            coordinates.get(i).setX(rotationCoords[orientation][i][0] + x);
         }
+    }
+
+
+    public int getHighestX(ArrayList<Coordinates> coordinates) {
+        int HighestX = coordinates.get(0).getX();
+        for (Coordinates coordinate : coordinates) {
+            if (coordinate.getX() < HighestX) {
+                HighestX = coordinate.getX();
+            }
+        }
+        return HighestX;
+    }
+
+    public int getLowestY(ArrayList<Coordinates> coordinates) {
+        int lowestY = coordinates.get(0).getY();
+        for (Coordinates coordinate : coordinates) {
+            if (coordinate.getY() < lowestY) {
+                lowestY = coordinate.getY();
+            }
+        }
+        return lowestY;
     }
 
 }
